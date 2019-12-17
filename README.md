@@ -5,10 +5,10 @@
 <b>File ".htaccess"</b>
 <br>
 <code>
-RewriteEngine On
-RewriteBase /suit.ru/
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+RewriteEngine On<br>
+RewriteBase /suit.ru/<br>
+RewriteCond %{REQUEST_FILENAME} !-f<br>
+RewriteCond %{REQUEST_FILENAME} !-d<br>
 RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
 </code>
 
