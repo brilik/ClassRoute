@@ -26,3 +26,17 @@ RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
     Method "submit" - отпределяет по URI страницу переданную в параметре как <code>?uri=</code> и вызывает нужный класс или функцию
 </li>
 </ol>
+
+<h4>Какая структура?</h4>
+<p>Структура была взята из уже продуманной <code>cms WordPress</code>.</p>
+<p>Обязательные файлы:</p>
+<ul>
+<li><code>style.css</code></li>
+<li><code>index.php</code></li>
+</ul>
+<p>Необязательные файлы:</p>
+<ul>
+<li><code>page.php</code> по приоритету выше чем <code>index.php</code></li>
+<li><code>header.php</code></li>
+<li><code>footer.php</code></li>
+</ul>
