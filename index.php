@@ -55,7 +55,7 @@ class IncludeTemplate
         } else {
             IncludeTemplate::file('index');
         }
-
+        
         // Include footer
         IncludeTemplate::file('footer');
     }
@@ -67,25 +67,31 @@ class Posts
     
     public function __construct()
     {
-        array_push($this->posts, array(
-            'ID' => 0,
-            'post_slug' => '/',
-            'post_type' => 'page',
-            'post_title' => 'Страница привествия',
-            'post_desc' => 'Здравствуй дорогой друг. Рад что ты разобрался как развернуть этот шаблон',
-            'post_date' => date('Y-m-d H:i:s'),
-            'post_view' => 0
-        ));
-    
-        array_push($this->posts, array(
-            'ID' => 1,
-            'post_slug' => 'about',
-            'post_type' => 'page',
-            'post_title' => 'О нас',
-            'post_desc' => 'Расскажу немного о себе. Начал продавать ещё с 7 лет, когда понял что люди покупают это.',
-            'post_date' => date('Y-m-d H:i:s'),
-            'post_view' => 0
-        ));
+        array_push(
+            $this->posts,
+            array(
+                'ID'         => 0,
+                'post_slug'  => '/',
+                'post_type'  => 'page',
+                'post_title' => 'Страница привествия',
+                'post_desc'  => 'Здравствуй дорогой друг. Рад что ты разобрался как развернуть этот шаблон',
+                'post_date'  => date('Y-m-d H:i:s'),
+                'post_view'  => 0
+            )
+        );
+        
+        array_push(
+            $this->posts,
+            array(
+                'ID'         => 1,
+                'post_slug'  => 'about',
+                'post_type'  => 'page',
+                'post_title' => 'О нас',
+                'post_desc'  => 'Расскажу немного о себе. Начал продавать ещё с 7 лет, когда понял что люди покупают это.',
+                'post_date'  => date('Y-m-d H:i:s'),
+                'post_view'  => 0
+            )
+        );
         
         return $this->get();
     }
@@ -98,18 +104,28 @@ class Posts
 
 class About
 {
+    public function index()
+    {
+        echo ' и вызвал метод index';
+    }
+    
+    public function article()
+    {
+        echo ' и вызвал метод article';
+    }
+    
     public function __construct()
     {
         global $post;
         $post = new Posts();
         echo 'Сработал класс About';
-        Debug::pr($post);
+//        Debug::pr($post);
         $this->_other();
     }
     
     protected function _other()
     {
-        echo ' and uses method _other()';
+        echo ' и вызвал метод _other()';
     }
 }
 
@@ -164,9 +180,9 @@ class Route
     }
     
     /**
-     * Make the thing run.
+     * Make the thing run (for request param?uri=).
      */
-    public function submit()
+    public function init()
     {
         $uriGetParam = isset($_GET['uri']) ? $_GET['uri'] : '/';
         
@@ -181,6 +197,43 @@ class Route
             }
         }
     }
+    
+    /**
+     * Make the thing run (for request folder/style).
+     */
+    public function start()
+    {
+        $url = $this->get_request();
+        
+        foreach ($this->_uri as $key => $val) {
+            $val = trim($val, '/');
+        
+            if (preg_match("#^$val$#", $url[1])) {
+                // Redirect page on method or function
+                $useMethod = $this->_method[$key];
+                // Include template files
+                IncludeTemplate::method($useMethod);
+            }
+        }
+        
+        unset($url);
+    }
+    
+    protected function get_request()
+    {
+        $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+        
+        if ($_SERVER['HTTP_HOST'] === 'localhost') {
+            $array_uri = explode('/', $uri);
+            array_shift($array_uri);
+            $uri = $array_uri;
+            unset($array_uri);
+        } else {
+            $uri = explode('/', $uri);
+        }
+        
+        return $uri;
+    }
 }
 
 $r = new Route();
@@ -194,4 +247,5 @@ $r->add('admin', 'Admin');
 
 Debug::pr($r);
 
-$r->submit();
+$r->init();
+//$r->start();
