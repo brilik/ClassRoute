@@ -1,34 +1,35 @@
-<h1>Route</h1>
+# Route
 <p>Класс для создания Route и их методов.</p>
 <p>Для его использования обязательно должен быть создан конфигурационный файл <code>.htaccess</code> на сервере <code>Apache</code>.</p>
 
 <b>File ".htaccess"</b>
-<br>
-<code>
-RewriteEngine On<br>
-RewriteBase /suit.ru/<br>
-RewriteCond %{REQUEST_FILENAME} !-f<br>
-RewriteCond %{REQUEST_FILENAME} !-d<br>
-RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
-</code>
 
-<h4>Как использовать класс?</h4>
+> RewriteEngine On <br>
+> RewriteBase /suit.ru/<br>
+> RewriteCond %{REQUEST_FILENAME} !-f<br>
+> RewriteCond %{REQUEST_FILENAME} !-d<br>
+> RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
+
+<h4 id="use">Как использовать класс?</h4>
 <p>Создаём экземпляр класса.</p>
 <ol>
 <li>
-    Method "add" get two param:
+    Method "add" is build collection <code>URI</code> and get two param:
     <ul>
-    <li>URI - this is page</li>
-    <li>METHOD - create class for this page</li>
+    <li>URI - slug page</li>
+    <li>METHOD - <code>[null:default]</code> use class for this page</li>
     </ul>
 </li>
 <li>
-    Method "submit" - отпределяет по URI страницу переданную в параметре как <code>?uri=</code> и вызывает нужный класс или функцию
+    Method "start" is route to class and get one param
+    <ul>
+    <li>METHOD - <code>[param:default\folder]</code> is style get <code>URI</code> request</li>
+    </ul>
 </li>
 </ol>
 
-<h4>Какая структура?</h4>
-<p>Структура была взята из уже продуманной <code>cms WordPress</code>.</p>
+<h4 id="struct">Какая структура?</h4>
+<p>Структура была взята из уже продуманной <code>CMS</code> <code>WordPress</code>.</p>
 <p>Обязательные файлы:</p>
 <ul>
 <li><code>style.css</code></li>
@@ -39,4 +40,5 @@ RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
 <li><code>page.php</code> по приоритету выше чем <code>index.php</code></li>
 <li><code>header.php</code></li>
 <li><code>footer.php</code></li>
+<li><code>404.php</code></li>
 </ul>
