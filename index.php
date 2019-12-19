@@ -179,36 +179,20 @@ class Route
         }
     }
     
-    /**
-     * Make the thing run (for request param?uri=).
-     */
-    public function init()
+    public function start($method = 'param')
     {
-        $uriGetParam = isset($_GET['uri']) ? $_GET['uri'] : '/';
+        // Make the thing run (for request param?uri=).
+        $url = isset($_GET['uri']) ? $_GET['uri'] : '/';
+    
+        // Make the thing run (for request folder/style).
+        if ($method === 'folder') {
+            $url = $this->get_request();
+        }
         
         foreach ($this->_uri as $key => $val) {
             $val = trim($val, '/');
             
-            if (preg_match("#^$val$#", $uriGetParam)) {
-                // Redirect page on method or function
-                $useMethod = $this->_method[$key];
-                // Include template files
-                IncludeTemplate::method($useMethod);
-            }
-        }
-    }
-    
-    /**
-     * Make the thing run (for request folder/style).
-     */
-    public function start()
-    {
-        $url = $this->get_request();
-        
-        foreach ($this->_uri as $key => $val) {
-            $val = trim($val, '/');
-        
-            if (preg_match("#^$val$#", $url[1])) {
+            if (preg_match("#^$val$#", $url)) {
                 // Redirect page on method or function
                 $useMethod = $this->_method[$key];
                 // Include template files
@@ -226,7 +210,7 @@ class Route
         if ($_SERVER['HTTP_HOST'] === 'localhost') {
             $array_uri = explode('/', $uri);
             array_shift($array_uri);
-            $uri = $array_uri;
+            $uri = $array_uri[1];
             unset($array_uri);
         } else {
             $uri = explode('/', $uri);
@@ -247,5 +231,4 @@ $r->add('admin', 'Admin');
 
 Debug::pr($r);
 
-$r->init();
-//$r->start();
+$r->start('folder');
