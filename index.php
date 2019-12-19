@@ -6,8 +6,6 @@ define('THEME', 'default');
 define('PATH_THEME_ACTIVE', PATH_VIEW . 'themes/' . THEME);
 include_once PATH_ROOT . '/debug.php';
 
-$post = [];
-
 class IncludeTemplate
 {
     public static function file($fileName, $ext = 'php', $nonShow = false)
@@ -34,7 +32,7 @@ class IncludeTemplate
         // Exists require files for template
         if ( ! IncludeTemplate::file('index', 'php', true) ||
              ! IncludeTemplate::file('style', 'css', true)) {
-            die('Ошибка: шаблон должен содержать обязательные файлы <code>index.php</code> и <code>style.css</code>');
+            die('<script>alert("Ошибка: шаблон должен содержать обязательные файлы <code>index.php</code> и <code>style.css</code>");</script>');
         }
         
         // Include header
@@ -49,11 +47,18 @@ class IncludeTemplate
             die('Create class or function page');
         }
         
-        // Include page or index
-        if (IncludeTemplate::file('page', 'php', true)) {
-            IncludeTemplate::file('page');
-        } else {
-            IncludeTemplate::file('index');
+        // Include template
+        if ($methodName === 'NotPage' && ! IncludeTemplate::file('404', 'php', true)) {
+            // Include page or index
+            if (IncludeTemplate::file('page', 'php', true)) {
+                // Include page.php
+                IncludeTemplate::file('page');
+            } else {
+                // Include index.php
+                IncludeTemplate::file('index');
+            }
+        } elseif (IncludeTemplate::file('404', 'php', true)) {
+            echo ' and uses template 404 page';
         }
         
         // Include footer
@@ -61,44 +66,11 @@ class IncludeTemplate
     }
 }
 
-class Posts
+class NotPage
 {
-    public $posts = [];
-    
     public function __construct()
     {
-        array_push(
-            $this->posts,
-            array(
-                'ID'         => 0,
-                'post_slug'  => '/',
-                'post_type'  => 'page',
-                'post_title' => 'Страница привествия',
-                'post_desc'  => 'Здравствуй дорогой друг. Рад что ты разобрался как развернуть этот шаблон',
-                'post_date'  => date('Y-m-d H:i:s'),
-                'post_view'  => 0
-            )
-        );
-        
-        array_push(
-            $this->posts,
-            array(
-                'ID'         => 1,
-                'post_slug'  => 'about',
-                'post_type'  => 'page',
-                'post_title' => 'О нас',
-                'post_desc'  => 'Расскажу немного о себе. Начал продавать ещё с 7 лет, когда понял что люди покупают это.',
-                'post_date'  => date('Y-m-d H:i:s'),
-                'post_view'  => 0
-            )
-        );
-        
-        return $this->get();
-    }
-    
-    public function get()
-    {
-        return $this->posts;
+        echo 'Use class NotPage';
     }
 }
 
@@ -116,11 +88,9 @@ class About
     
     public function __construct()
     {
-        global $post;
-        $post = new Posts();
         echo 'Сработал класс About';
 //        Debug::pr($post);
-        $this->_other();
+        $this->index();
     }
     
     protected function _other()
@@ -165,7 +135,7 @@ class Route
     private $_method = [];
     
     /**
-     * Build collection URI
+     * Build collection URI.
      *
      * @param $uri
      * @param null $method
@@ -179,14 +149,26 @@ class Route
         }
     }
     
+    /**
+     * Route to class.
+     *
+     * @param string $method
+     *
+     * @example $method = param: /?uri=page
+     * @example $method = folder: /page
+     */
     public function start($method = 'param')
     {
         // Make the thing run (for request param?uri=).
         $url = isset($_GET['uri']) ? $_GET['uri'] : '/';
-    
+        
         // Make the thing run (for request folder/style).
         if ($method === 'folder') {
             $url = $this->get_request();
+        }
+        
+        if ( ! in_array("/$url", $this->_uri)) {
+            IncludeTemplate::method('NotPage');
         }
         
         foreach ($this->_uri as $key => $val) {
@@ -200,9 +182,14 @@ class Route
             }
         }
         
-        unset($url);
+        unset($url, $method);
     }
     
+    /**
+     * Get url path.
+     *
+     * @return array|mixed|string
+     */
     protected function get_request()
     {
         $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
