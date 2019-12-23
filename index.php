@@ -4,7 +4,7 @@ define('PATH_ROOT', dirname(__FILE__));
 define('PATH_VIEW', PATH_ROOT . '/view/');
 define('THEME', 'default');
 define('PATH_THEME_ACTIVE', PATH_VIEW . 'themes/' . THEME);
-include_once PATH_ROOT . '/debug.php';
+include_once PATH_ROOT . '/debug.php'; // todo: remove
 
 class IncludeTemplate
 {
@@ -35,9 +35,6 @@ class IncludeTemplate
             die('<script>alert("Ошибка: шаблон должен содержать обязательные файлы <code>index.php</code> и <code>style.css</code>");</script>');
         }
         
-        // Include header
-        IncludeTemplate::file('header');
-        
         // Include method\func page start
         if (class_exists($methodName)) {
             new $methodName;
@@ -46,6 +43,9 @@ class IncludeTemplate
         } else {
             die('Create class or function page');
         }
+        
+        // Include header
+        IncludeTemplate::file('header');
         
         // Include template
         if ($methodName === 'NotPage' && ! IncludeTemplate::file('404', 'php', true)) {
