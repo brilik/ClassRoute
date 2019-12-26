@@ -37,8 +37,9 @@
 </ul>
 <p>Необязательные файлы:</p>
 <ul>
-<li><code>page.php</code> по приоритету выше чем <code>index.php</code></li>
+<li><code>404.php</code></li>
 <li><code>header.php</code></li>
 <li><code>footer.php</code></li>
-<li><code>404.php</code></li>
+<li><code>functions.php</code></li>
+<li><code>page.php</code> по приоритету выше чем <code>index.php</code></li>
 </ul>
