@@ -5,7 +5,8 @@ define('PATH_VIEW', PATH_ROOT . '/view/');
 define('PATH_ENGINE', PATH_ROOT . '/engine/');
 define('THEME', 'default');
 define('PATH_THEME_ACTIVE', PATH_VIEW . 'themes/' . THEME);
-include_once PATH_ROOT . '/debug.php'; // todo: remove
+// Include Debugger
+include_once PATH_ENGINE . 'classes/Debug.php'; // todo: remove
 
 class IncludeTemplate
 {
@@ -47,15 +48,17 @@ class IncludeTemplate
         unset($pathToFile, $fileName);
     }
     
-    public static function method($methodName)
+    private static function checkCreateRequireFiles()
     {
         // Exists require files for template
         if ( ! IncludeTemplate::file('index', 'php', true) ||
              ! IncludeTemplate::file('style', 'css', true)) {
             die('<script>alert("Ошибка: шаблон должен содержать обязательные файлы <code>index.php</code> и <code>style.css</code>");</script>');
         }
-        
-        // Include method\func page start
+    }
+    
+    private static function checkCreatedFunctions(string $methodName)
+    {
         if (class_exists($methodName)) {
             new $methodName;
         } elseif (function_exists(mb_strtolower($methodName))) {
@@ -63,13 +66,11 @@ class IncludeTemplate
         } else {
             die('Create class or function page');
         }
+    }
     
-        IncludeTemplate::fileEngine('functions');
-        
-        // Include header
-        IncludeTemplate::file('header');
-        
-        // Include template
+    
+    private static function checkAndIncludeMainPageOr404($methodName)
+    {
         if ($methodName === 'NotPage' && ! IncludeTemplate::file('404', 'php', true)) {
             // Include index.php or page.php
             self::includeMainPage();
@@ -80,12 +81,33 @@ class IncludeTemplate
             // Include index.php or page.php
             self::includeMainPage();
         }
+    }
+    
+    public static function method($methodName)
+    {
+        // Check on created require files
+        self::checkCreateRequireFiles();
+
+        // Check method\func class controller for page starting
+        self::checkCreatedFunctions($methodName);
+    
+        // Include functions for development
+        IncludeTemplate::fileEngine('functions');
+        
+        // Include functions for development
+        IncludeTemplate::file('functions');
+        
+        // Include header
+        IncludeTemplate::file('header');
+        
+        // Include template main page or 404
+        self::checkAndIncludeMainPageOr404($methodName);
         
         // Include footer
         IncludeTemplate::file('footer');
     }
     
-    private function includeMainPage()
+    private static function includeMainPage()
     {
         // Include page or index
         if (IncludeTemplate::file('page', 'php', true)) {
