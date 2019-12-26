@@ -2,15 +2,35 @@
 
 define('PATH_ROOT', dirname(__FILE__));
 define('PATH_VIEW', PATH_ROOT . '/view/');
+define('PATH_ENGINE', PATH_ROOT . '/engine/');
 define('THEME', 'default');
 define('PATH_THEME_ACTIVE', PATH_VIEW . 'themes/' . THEME);
 include_once PATH_ROOT . '/debug.php'; // todo: remove
 
 class IncludeTemplate
 {
+    private static function fileEngine($fileName, $ext = 'php', $nonShow = false)
+    {
+        $pathToFile = PATH_ENGINE . "{$fileName}.{$ext}";
+        
+        if ( ! is_dir(PATH_THEME_ACTIVE)) {
+            die('Не существует такой папки: ' . PATH_THEME_ACTIVE);
+        }
+        
+        if (file_exists($pathToFile)) {
+            if ($nonShow) {
+                return $nonShow;
+            }
+            
+            include_once $pathToFile;
+        }
+        
+        unset($pathToFile, $fileName);
+    }
+    
     public static function file($fileName, $ext = 'php', $nonShow = false)
     {
-        $pathToFile = PATH_THEME_ACTIVE . "/{$fileName}.$ext";
+        $pathToFile = PATH_THEME_ACTIVE . "/{$fileName}.{$ext}";
         
         if ( ! is_dir(PATH_THEME_ACTIVE)) {
             die('Не существует такой папки: ' . PATH_THEME_ACTIVE);
@@ -43,26 +63,38 @@ class IncludeTemplate
         } else {
             die('Create class or function page');
         }
+    
+        IncludeTemplate::fileEngine('functions');
         
         // Include header
         IncludeTemplate::file('header');
         
         // Include template
         if ($methodName === 'NotPage' && ! IncludeTemplate::file('404', 'php', true)) {
-            // Include page or index
-            if (IncludeTemplate::file('page', 'php', true)) {
-                // Include page.php
-                IncludeTemplate::file('page');
-            } else {
-                // Include index.php
-                IncludeTemplate::file('index');
-            }
-        } elseif (IncludeTemplate::file('404', 'php', true)) {
-            echo ' and uses template 404 page';
+            // Include index.php or page.php
+            self::includeMainPage();
+        } elseif ($methodName === 'NotPage' && IncludeTemplate::file('404', 'php', true)) {
+            // Include 404.php
+            IncludeTemplate::file('404');
+        } else {
+            // Include index.php or page.php
+            self::includeMainPage();
         }
         
         // Include footer
         IncludeTemplate::file('footer');
+    }
+    
+    private function includeMainPage()
+    {
+        // Include page or index
+        if (IncludeTemplate::file('page', 'php', true)) {
+            // Include page.php
+            IncludeTemplate::file('page');
+        } else {
+            // Include index.php
+            IncludeTemplate::file('index');
+        }
     }
 }
 
@@ -89,7 +121,7 @@ class About
     public function __construct()
     {
         echo 'Сработал класс About';
-//        Debug::pr($post);
+        
         $this->index();
     }
     
@@ -192,9 +224,9 @@ class Route
      */
     protected function get_request()
     {
-        $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+        $uri = ($_SERVER['REQUEST_URI']) ? urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) : '';
         
-        if ($_SERVER['HTTP_HOST'] === 'localhost') {
+        if ($_SERVER['HTTP_HOST'] && $_SERVER['HTTP_HOST'] === 'localhost') {
             $array_uri = explode('/', $uri);
             array_shift($array_uri);
             $uri = $array_uri[1];
